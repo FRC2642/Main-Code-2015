@@ -8,19 +8,31 @@ import edu.wpi.first.wpilibj.RobotDrive.MotorType;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.DigitalInput;
-
+import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.Timer;
 
 public class Robot extends IterativeRobot {
 	
-	Joystick stick; Joystick stickAux;
+	Joystick driveStick; Joystick auxStick; Joystick auxCard; 
 	RobotDrive drive;
 	Gyro gyro;
-	DigitalInput tooHigh;
-	DigitalInput tooLow;
+	DigitalInput liftUpperLimit;
+	DigitalInput liftLowerLimit;
 	Talon rightPicker;
 	Talon leftPicker;
 	Talon lift;
-	//Talon lift;
+	Encoder liftEncoder;
+	DigitalInput toteIn;
+
+	
+	Compressor compressor;
+	Solenoid dogs;
+	Solenoid pusher;
+	Solenoid flipper;
+	
+	
 	//DigitalInput toteIn; 
 	//DigitalInput fiveTotesIn; DigitalInput liftUpperLimit;DigitalInput liftLowerLimit;
 
@@ -35,17 +47,26 @@ public class Robot extends IterativeRobot {
      * used for any initialization code.
      */
     public void robotInit() {
-    	stick = new Joystick(0);
+    	driveStick = new Joystick(0);
+    	auxStick = new Joystick(1);
+    	auxCard = new Joystick(2);
     	gyro = new Gyro(0);
-    	drive = new RobotDrive(0,2,1,3); 
+    	drive = new RobotDrive(2,0,1,3); 
     	drive.setInvertedMotor(MotorType.kFrontLeft, true);
     	drive.setInvertedMotor(MotorType.kRearRight, true);
+    	
     	rightPicker = new Talon(6);
     	leftPicker = new Talon(5);
-    	stick = new Joystick(0);
     	lift = new Talon(4);
-    	tooHigh = new DigitalInput(8);
-    	tooLow = new DigitalInput(9);
+    	liftEncoder = new Encoder(6,7);
+    	liftUpperLimit = new DigitalInput(8);
+    	liftLowerLimit = new DigitalInput(9);
+    	
+    	compressor = new Compressor(0);
+    	dogs = new Solenoid(0);
+    	pusher = new Solenoid(1);
+    	flipper = new Solenoid(2);
+    	
     	
     }
     
@@ -69,6 +90,7 @@ public class Robot extends IterativeRobot {
     public void teleopInit(){
     	gyro.reset();
     	crabStraightCounter = 0;
+    	compressor.start();
     }
 
     /**
@@ -77,45 +99,54 @@ public class Robot extends IterativeRobot {
     public void teleopPeriodic() {
         angle = gyro.getAngle();
         
-    	if(stick.getRawButton(12)){ //reset gyro
+    	if(auxCard.getRawButton(5)){ //reset gyro
        	gyro.reset();
 
     	}
     	
-        if (stick.getRawButton(2) && crabStraightCounter < 1){ //turn on crab straight
+        if (driveStick.getRawButton(2) && crabStraightCounter < 1){ //turn on crab straight
         	crabStraightSet = gyro.getAngle();
         	crabStraightCounter++;
         
-        }else if (stick.getRawButton(2) && crabStraightCounter >= 1){
-        	drive.mecanumDrive_Cartesian(stick.getX(), stick.getY(), (angle - crabStraightSet)*-Kp, 0);
+        }else if (driveStick.getRawButton(2) && crabStraightCounter >= 1){ //crab straight
+        	drive.mecanumDrive_Cartesian(driveStick.getX(), driveStick.getY(), (angle - crabStraightSet)*-Kp, 0);
         	crabStraightCounter++;
 
-        }else if( !stick.getRawButton(2) && crabStraightCounter >= 1){
+        }else if( !driveStick.getRawButton(2) && crabStraightCounter >= 1){ //reset counter
         	crabStraightCounter = 0;
-        }else if(stick.getRawButton(1)){
-        	drive.mecanumDrive_Cartesian(stick.getX(), stick.getY(), stick.getTwist(), gyro.getAngle());
+        }else if(driveStick.getRawButton(1)){ //full speed
+        	drive.mecanumDrive_Cartesian(driveStick.getX(), driveStick.getY(), driveStick.getTwist(), gyro.getAngle());
 
-        }else if(stick.getRawButton(11)){ 
-        	drive.mecanumDrive_Cartesian(stick.getX(), stick.getY(), stick.getTwist(), 0);
+        }else if(auxCard.getRawButton(6)){ //turn of field oriented control 
+        	drive.mecanumDrive_Cartesian(driveStick.getX(), driveStick.getY(), driveStick.getTwist(), 0);
 
         }else{
-        	drive.mecanumDrive_Cartesian(stick.getX()/2, stick.getY()/2, stick.getTwist()/2, gyro.getAngle());
-
+        	drive.mecanumDrive_Cartesian(driveStick.getX()/2, driveStick.getY()/2, driveStick.getTwist()/2, gyro.getAngle());
         }
         
-        //auxilar functions test
-        if(stick.getRawButton(5) && !tooHigh.get()){  //Button 3 makes the lift go up unless it hits the upper limit switch.
+        if(driveStick.getRawButton(3)){ //flipper 
+        	flipper.set(true);
+        }else{
+        	flipper.set(false);
+        }
+ //==============================================================================================
+        
+        
+        //lift
+        if(auxStick.getRawButton(3) && !liftUpperLimit.get()){  //up
         	lift.set(1);
-        }else if(stick.getRawButton(3) && !tooLow.get()){  //Button 5 makes the lift go down unless it hits the lower limit switch.
+        }else if(auxStick.getRawButton(2) && !liftUpperLimit.get()){  //down
         	lift.set(-0.9);
         }else{
-        	lift.set(0);                            //If neither of the buttons are pressed, the lift stays where it is.
+        	lift.set(0);                            
         }
         
-        if(stick.getRawButton(6)) { //in
+//===================================================================================================
+        //picker
+        if(auxCard.getRawButton(9)) { //in
         	rightPicker.set(0.5);
         	leftPicker.set(-0.5); //left is opposite
-        }else if(stick.getRawButton(4)) { //out
+        }else if(auxCard.getRawButton(7)) { //out
         	rightPicker.set(-0.5);
         	leftPicker.set(0.5);
         }else{
@@ -123,7 +154,20 @@ public class Robot extends IterativeRobot {
         	rightPicker.set(0);		
         }
         
-        //System.out.println(gyro.getAngle());
+        if(auxStick.getRawButton(6)){
+        	dogs.set(true);
+        }else{
+        	dogs.set(false);
+        }
+        
+        if(auxStick.getRawButton(7)){
+        	pusher.set(true);
+        }else{
+        	pusher.set(false);
+        }
+        
+        //Timer.delay(0.005);
+        System.out.println(liftEncoder.getDistance());
     }
     
     /**
