@@ -24,7 +24,7 @@ public class Robot extends IterativeRobot {
 	Talon leftPicker;
 	Talon lift;
 	Encoder liftEncoder;
-	DigitalInput toteIn;
+	DigitalInput toteInRobot;
 
 	
 	Compressor compressor;
@@ -35,12 +35,14 @@ public class Robot extends IterativeRobot {
 	
 	//DigitalInput toteIn; 
 	//DigitalInput fiveTotesIn; DigitalInput liftUpperLimit;DigitalInput liftLowerLimit;
-
+	boolean liftUp;
+	boolean liftDown;
 	int autoLoopCounter;
 	double Kp = 0.04;
 	double angle;
     int crabStraightCounter;
     double crabStraightSet;
+    int unloadCounter;
 	
     /**
      * This function is run when the robot is first started up and should be
@@ -61,6 +63,7 @@ public class Robot extends IterativeRobot {
     	liftEncoder = new Encoder(6,7);
     	liftUpperLimit = new DigitalInput(8);
     	liftLowerLimit = new DigitalInput(9);
+    	toteInRobot = new DigitalInput(4);
     	
     	compressor = new Compressor(0);
     	dogs = new Solenoid(0);
@@ -91,6 +94,10 @@ public class Robot extends IterativeRobot {
     	gyro.reset();
     	crabStraightCounter = 0;
     	compressor.start();
+    	liftEncoder.reset();
+    	liftUp = false;
+    	liftDown = false;
+    	unloadCounter = 0;
     }
 
     /**
@@ -130,44 +137,129 @@ public class Robot extends IterativeRobot {
         	flipper.set(false);
         }
  //==============================================================================================
-        
-        
         //lift
+        
+        /*
         if(auxStick.getRawButton(3) && !liftUpperLimit.get()){  //up
         	lift.set(1);
-        }else if(auxStick.getRawButton(2) && !liftUpperLimit.get()){  //down
+        }else if(auxStick.getRawButton(2) && !liftLowerLimit.get()){  //down
         	lift.set(-0.9);
         }else{
         	lift.set(0);                            
         }
+        */
+       //human overide
+        
+        //human overide
+        if(auxCard.getRawButton(12) || auxStick.getRawButton(3) || auxStick.getRawButton(4)){
+        	if(auxStick.getRawButton(3) && !liftUpperLimit.get()){  //up
+            	lift.set(1);
+            }else if(auxStick.getRawButton(2) && !liftLowerLimit.get()){  //down
+            	lift.set(-0.9);
+            }else if(auxCard.getRawButton(11)){
+            	if(liftEncoder.getDistance() > 200){ 
+    				lift.set(-0.5);
+    			}else if(liftEncoder.getDistance() < 140){
+    				lift.set(0.5);
+    			}else{
+    				lift.set(0);
+    			}
+            }else{
+            	lift.set(0);                            
+            }
+        }else{ //auto lift
+        	if(liftUpperLimit.get() || liftLowerLimit.get()){
+        		liftUp = false;
+        		liftDown = false;
+        	}else{
+        	if(toteInRobot.get() && !liftUp && !liftDown){//auto load up to dogs
+				liftUp = true; 
+				liftDown = false;
+				
+			}else if(liftUp){ //go up to dogs
+				if(liftEncoder.getDistance() < 1250){
+					liftUp = false;
+					liftDown = true;
+				}
+				
+				lift.set(0.5);
+				
+			}else if(liftDown){//go down to start
+				if(liftEncoder.getDistance() > 80){
+					liftUp = false;
+					liftDown = false;
+				}
+				
+				lift.set(-0.5);
+	   
+			}else{
+				lift.set(0);
+			}	
+        	}
+        	
+   
+        }
+        
         
 //===================================================================================================
         //picker
-        if(auxCard.getRawButton(9)) { //in
-        	rightPicker.set(0.5);
-        	leftPicker.set(-0.5); //left is opposite
-        }else if(auxCard.getRawButton(7)) { //out
-        	rightPicker.set(-0.5);
-        	leftPicker.set(0.5);
+        if(auxStick.getRawButton(1)){ //suto unload
+        	if(auxStick.getRawButton(1) && unloadCounter <= 25){ //open dogs
+        		dogs.set(true);
+        		pusher.set(false);
+        		rightPicker.set(0);
+        		leftPicker.set(0);
+        		unloadCounter++;
+        	}else if(auxStick.getRawButton(1) && unloadCounter >= 25){ //open dogs push and revers pickers
+        		dogs.set(true);
+        		pusher.set(true);
+        		rightPicker.set(-0.5);
+        		leftPicker.set(0.5);
+        		unloadCounter++;
+        	}else{ //do nothing
+        		dogs.set(false);
+        		pusher.set(false);
+        		rightPicker.set(0);
+        		leftPicker.set(0);
+        	}
+        }else if(!auxStick.getRawButton(1) && unloadCounter > 100){ //reset counter
+    		unloadCounter = 0;
+    		dogs.set(false);
+    		pusher.set(false);
+    		rightPicker.set(0);
+    		leftPicker.set(0);
+        	
         }else{
-        	leftPicker.set(0);
-        	rightPicker.set(0);		
-        }
         
-        if(auxStick.getRawButton(6)){
-        	dogs.set(true);
-        }else{
-        	dogs.set(false);
-        }
         
-        if(auxStick.getRawButton(7)){
-        	pusher.set(true);
-        }else{
-        	pusher.set(false);
-        }
+        	if(auxCard.getRawButton(9)) { //in
+        		rightPicker.set(0.5);
+        		leftPicker.set(-0.5); //left is opposite
+        	}else if(auxCard.getRawButton(7)) { //out
+        		rightPicker.set(-0.5);
+        		leftPicker.set(0.5);
+        	}else{
+        		leftPicker.set(0);
+        		rightPicker.set(0);		
+        	}
+
+        	if(auxStick.getRawButton(6)){
+        		dogs.set(true);
+        	}else{
+        		dogs.set(false);
+        	}
         
+        	if(auxStick.getRawButton(7)){
+        		pusher.set(true);
+        	}else{
+        		pusher.set(false);
+        	}
+        }
+//============================================================================================        
         //Timer.delay(0.005);
-        System.out.println(liftEncoder.getDistance());
+        System.out.println(unloadCounter);
+        //System.out.println(liftUpperLimit.get());
+
     }
     
     /**
