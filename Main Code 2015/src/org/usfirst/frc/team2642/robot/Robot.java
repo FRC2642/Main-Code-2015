@@ -25,7 +25,8 @@ public class Robot extends IterativeRobot {
 	Talon lift;
 	Encoder liftEncoder;
 	DigitalInput toteInRobot;
-
+	Encoder backRightEncoder;
+	Encoder backLeftEncoder;
 	
 	Compressor compressor;
 	Solenoid dogs;
@@ -57,6 +58,7 @@ public class Robot extends IterativeRobot {
     	drive.setInvertedMotor(MotorType.kFrontLeft, true);
     	drive.setInvertedMotor(MotorType.kRearRight, true);
     	
+    	
     	rightPicker = new Talon(6);
     	leftPicker = new Talon(5);
     	lift = new Talon(4);
@@ -78,12 +80,232 @@ public class Robot extends IterativeRobot {
      */
     public void autonomousInit() {
     	autoLoopCounter = 0;
+    	gyro.reset();
+    	backRightEncoder.reset();
+    	backLeftEncoder.reset();
+    	liftEncoder.reset();
+    	compressor.start();
+    	
+    	
     }
 
     /**
      * This function is called periodically during autonomous
      */
     public void autonomousPeriodic() {
+    	while(backLeftEncoder.getDistance() > 50){ //drive to first box
+    		drive.mecanumDrive_Cartesian(0, -0.3, 0, 0);
+    		rightPicker.set(0);
+    		leftPicker.set(0);
+    		lift.set(0);
+    		dogs.set(false);
+    		pusher.set(false);
+    	}
+    	backLeftEncoder.reset();
+    	
+    	while(!toteInRobot.get()){ //pick box 
+    		drive.mecanumDrive_Cartesian(0, 0, 0, 0);
+    		rightPicker.set(0.5);
+    		leftPicker.set(-0.5);
+    		lift.set(0);
+    		dogs.set(false);
+    		pusher.set(false);
+    		
+    	}
+    	
+    	while(liftEncoder.getDistance() < 1800 && !liftUpperLimit.get()){ //lift up
+    		drive.mecanumDrive_Cartesian(0, 0, 0, 0);
+    		rightPicker.set(0);
+    		leftPicker.set(0);
+    		lift.set(1);
+    		dogs.set(false);
+    		pusher.set(false);
+    	}
+    	
+    	while(liftEncoder.getDistance() > 0 && !liftLowerLimit.get()){ //lift down
+    		drive.mecanumDrive_Cartesian(0, 0, 0, 0);
+    		rightPicker.set(0);
+    		leftPicker.set(0);
+    		lift.set(-0.9);
+    		dogs.set(false);
+    		pusher.set(false);
+    	}
+    	
+    	while(backLeftEncoder.getDistance() < 200){ //crab left
+    		drive.mecanumDrive_Cartesian(0.3, 0, 0, 0);
+    		rightPicker.set(0);
+    		leftPicker.set(0);
+    		lift.set(0);
+    		dogs.set(false);
+    		pusher.set(false);
+    	}
+    	backLeftEncoder.reset();
+    	
+    	while(backLeftEncoder.getDistance() < 400){ //drive 4ward 
+    		drive.mecanumDrive_Cartesian(0, -0.3, 0, 0);
+    		rightPicker.set(0);
+    		leftPicker.set(0);
+    		lift.set(0);
+    		dogs.set(false);
+    		pusher.set(false);
+    	}
+    	backLeftEncoder.reset();
+    	
+    	while(backLeftEncoder.getDistance() < 200){ //crab right
+    		drive.mecanumDrive_Cartesian(-0.3, 0, 0, 0);
+    		rightPicker.set(0);
+    		leftPicker.set(0);
+    		lift.set(0);
+    		dogs.set(false);
+    		pusher.set(false);
+    	}
+    	backLeftEncoder.reset();
+    	
+    	while(backLeftEncoder.getDistance() < 100){ //drive 4ward to pick up box
+    		drive.mecanumDrive_Cartesian(0, -0.3, 0, 0);
+    		rightPicker.set(0);
+    		leftPicker.set(0);
+    		lift.set(0);
+    		dogs.set(false);
+    		pusher.set(false);
+    	}
+    	backLeftEncoder.reset();
+    	
+    	while(!toteInRobot.get()){ //pick box 
+    		drive.mecanumDrive_Cartesian(0, 0, 0, 0);
+    		rightPicker.set(0.5);
+    		leftPicker.set(-0.5);
+    		lift.set(0);
+    		dogs.set(false);
+    		pusher.set(false);
+    		
+    	}
+    	
+    	while(liftEncoder.getDistance() < 1800 && !liftUpperLimit.get()){ //lift up
+    		drive.mecanumDrive_Cartesian(0, 0, 0, 0);
+    		rightPicker.set(0);
+    		leftPicker.set(0);
+    		lift.set(1);
+    		dogs.set(false);
+    		pusher.set(false);
+    	}
+    	
+    	while(liftEncoder.getDistance() > 0 && !liftLowerLimit.get()){ //lift down
+    		drive.mecanumDrive_Cartesian(0, 0, 0, 0);
+    		rightPicker.set(0);
+    		leftPicker.set(0);
+    		lift.set(-0.9);
+    		dogs.set(false);
+    		pusher.set(false);
+    	}
+    	
+    	while(backLeftEncoder.getDistance() < 200){ //crab left
+    		drive.mecanumDrive_Cartesian(0.3, 0, 0, 0);
+    		rightPicker.set(0);
+    		leftPicker.set(0);
+    		lift.set(0);
+    		dogs.set(false);
+    		pusher.set(false);
+    	}
+    	backLeftEncoder.reset();
+    	
+    	while(backLeftEncoder.getDistance() < 400){ //drive 4ward 
+    		drive.mecanumDrive_Cartesian(0, -0.3, 0, 0);
+    		rightPicker.set(0);
+    		leftPicker.set(0);
+    		lift.set(0);
+    		dogs.set(false);
+    		pusher.set(false);
+    	}
+    	backLeftEncoder.reset();
+    	
+    	while(backLeftEncoder.getDistance() < 200){ //crab right
+    		drive.mecanumDrive_Cartesian(-0.3, 0, 0, 0);
+    		rightPicker.set(0);
+    		leftPicker.set(0);
+    		lift.set(0);
+    		dogs.set(false);
+    		pusher.set(false);
+    	}
+    	backLeftEncoder.reset();
+    	
+    	while(backLeftEncoder.getDistance() < 100){ //drive 4ward to pick up box
+    		drive.mecanumDrive_Cartesian(0, -0.3, 0, 0);
+    		rightPicker.set(0);
+    		leftPicker.set(0);
+    		lift.set(0);
+    		dogs.set(false);
+    		pusher.set(false);
+    	}
+    	backLeftEncoder.reset();
+    	
+    	while(!toteInRobot.get()){ //pick box 
+    		drive.mecanumDrive_Cartesian(0, 0, 0, 0);
+    		rightPicker.set(0.5);
+    		leftPicker.set(-0.5);
+    		lift.set(0);
+    		dogs.set(false);
+    		pusher.set(false);
+    		
+    	}
+    	
+    	while(liftEncoder.getDistance() < 800 && !liftUpperLimit.get()){ //lift up little bit
+    		drive.mecanumDrive_Cartesian(0, 0, 0, 0);
+    		rightPicker.set(0);
+    		leftPicker.set(0);
+    		lift.set(1);
+    		dogs.set(false);
+    		pusher.set(false);
+    	}
+    	
+    	while(backLeftEncoder.getDistance() < 1200){ //crab right into zone
+    		drive.mecanumDrive_Cartesian(-0.3, 0, 0, 0);
+    		rightPicker.set(0);
+    		leftPicker.set(0);
+    		lift.set(0);
+    		dogs.set(false);
+    		pusher.set(false);
+    	}
+    	backLeftEncoder.reset();
+    	
+    	autoLoopCounter = 0;
+    	while(autoLoopCounter < 100){ //open dogs
+    		drive.mecanumDrive_Cartesian(0, 0, 0, 0);
+    		rightPicker.set(0);
+    		leftPicker.set(0);
+    		lift.set(0);
+    		dogs.set(true);
+    		pusher.set(false);
+    		autoLoopCounter++;
+    	}
+    	
+    	while(liftEncoder.getDistance() > 0 && !liftLowerLimit.get()){ //lift down
+    		drive.mecanumDrive_Cartesian(0, 0, 0, 0);
+    		rightPicker.set(0);
+    		leftPicker.set(0);
+    		lift.set(-0.9);
+    		dogs.set(true);
+    		pusher.set(false);
+    	}
+    	
+    	
+    	while(backLeftEncoder.getDistance() > -300){ //do unload
+    		drive.mecanumDrive_Cartesian(0, 0.3, 0, 0);//drive backwards
+    		rightPicker.set(-0.5);//reverse rollers
+    		leftPicker.set(0.5);
+    		lift.set(0);
+    		dogs.set(true);
+    		pusher.set(true);
+    	}
+    	
+    	while(true){
+    		drive.mecanumDrive_Cartesian(0, 0, 0, 0);//drive backwards
+    		rightPicker.set(0);//reverse rollers
+    		leftPicker.set(0);
+    		lift.set(0);
+    		dogs.set(false);
+    		pusher.set(false);
+    	}
     	
     }
     
@@ -93,7 +315,7 @@ public class Robot extends IterativeRobot {
     public void teleopInit(){
     	gyro.reset();
     	crabStraightCounter = 0;
-    	compressor.start();
+    	//compressor.start();
     	liftEncoder.reset();
     	liftUp = false;
     	liftDown = false;
@@ -152,6 +374,7 @@ public class Robot extends IterativeRobot {
         
         //human overide
         if(auxCard.getRawButton(12) || auxStick.getRawButton(3) || auxStick.getRawButton(4)){
+        	System.out.println("on");
         	if(auxStick.getRawButton(3) && !liftUpperLimit.get()){  //up
             	lift.set(1);
             }else if(auxStick.getRawButton(2) && !liftLowerLimit.get()){  //down
@@ -177,7 +400,8 @@ public class Robot extends IterativeRobot {
 				liftDown = false;
 				
 			}else if(liftUp){ //go up to dogs
-				if(liftEncoder.getDistance() < 1250){
+				System.out.println("up");
+				if(liftEncoder.getDistance() > 1250){
 					liftUp = false;
 					liftDown = true;
 				}
@@ -185,7 +409,9 @@ public class Robot extends IterativeRobot {
 				lift.set(0.5);
 				
 			}else if(liftDown){//go down to start
-				if(liftEncoder.getDistance() > 80){
+				System.out.println("down");
+
+				if(liftEncoder.getDistance() < 80){
 					liftUp = false;
 					liftDown = false;
 				}
@@ -258,6 +484,8 @@ public class Robot extends IterativeRobot {
 //============================================================================================        
         //Timer.delay(0.005);
         System.out.println(unloadCounter);
+		System.out.println(toteInRobot.get());
+
         //System.out.println(liftUpperLimit.get());
 
     }
