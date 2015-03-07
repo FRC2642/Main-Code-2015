@@ -33,9 +33,6 @@ public class Robot extends IterativeRobot {
 	Solenoid pusher;
 	Solenoid flipper;
 	
-	
-	//DigitalInput toteIn; 
-	//DigitalInput fiveTotesIn; DigitalInput liftUpperLimit;DigitalInput liftLowerLimit;
 	boolean liftUp;
 	boolean liftDown;
 	int autoLoopCounter;
@@ -93,6 +90,8 @@ public class Robot extends IterativeRobot {
      * This function is called periodically during autonomous
      */
     public void autonomousPeriodic() {
+    	//put in gyro crab straight
+    	
     	while(backLeftEncoder.getDistance() > 50){ //drive to first box
     		drive.mecanumDrive_Cartesian(0, -0.3, 0, 0);
     		rightPicker.set(0);
@@ -298,9 +297,9 @@ public class Robot extends IterativeRobot {
     		pusher.set(true);
     	}
     	
-    	while(true){
-    		drive.mecanumDrive_Cartesian(0, 0, 0, 0);//drive backwards
-    		rightPicker.set(0);//reverse rollers
+    	while(true){ //stop
+    		drive.mecanumDrive_Cartesian(0, 0, 0, 0);
+    		rightPicker.set(0);
     		leftPicker.set(0);
     		lift.set(0);
     		dogs.set(false);
@@ -330,7 +329,6 @@ public class Robot extends IterativeRobot {
         
     	if(auxCard.getRawButton(5)){ //reset gyro
        	gyro.reset();
-
     	}
     	
         if (driveStick.getRawButton(2) && crabStraightCounter < 1){ //turn on crab straight
@@ -395,12 +393,12 @@ public class Robot extends IterativeRobot {
         		liftUp = false;
         		liftDown = false;
         	}else{
-        	if(toteInRobot.get() && !liftUp && !liftDown){//auto load up to dogs
-				liftUp = true; 
-				liftDown = false;
+        		if(toteInRobot.get() && !liftUp && !liftDown){//auto load up to dogs
+        			liftUp = true; 
+        			liftDown = false;
 				
 			}else if(liftUp){ //go up to dogs
-				System.out.println("up");
+				//System.out.println("up");
 				if(liftEncoder.getDistance() > 1250){
 					liftUp = false;
 					liftDown = true;
@@ -457,11 +455,10 @@ public class Robot extends IterativeRobot {
         	
         }else{
         
-        
-        	if(auxCard.getRawButton(9)) { //in
+        	if(auxCard.getRawButton(9)){ //in
         		rightPicker.set(0.5);
         		leftPicker.set(-0.5); //left is opposite
-        	}else if(auxCard.getRawButton(7)) { //out
+        	}else if(auxCard.getRawButton(7)){ //out
         		rightPicker.set(-0.5);
         		leftPicker.set(0.5);
         	}else{
@@ -483,16 +480,12 @@ public class Robot extends IterativeRobot {
         }
 //============================================================================================        
         //Timer.delay(0.005);
-        System.out.println(unloadCounter);
-		System.out.println(toteInRobot.get());
-
+        //System.out.println(unloadCounter);
+		//System.out.println(toteInRobot.get());
         //System.out.println(liftUpperLimit.get());
 
     }
-    
-    /**
-     * This function is called periodically during test mode
-     */
+
     public void testPeriodic() {
     	LiveWindow.run();
     }
