@@ -371,7 +371,7 @@ public class Robot extends IterativeRobot {
         	lift.set(0);                            
         }
         */
-       //human overide
+      
         
         //human overide
         if(auxCard.getRawButton(12) || auxStick.getRawButton(3) || auxStick.getRawButton(2)){
@@ -404,34 +404,30 @@ public class Robot extends IterativeRobot {
         			liftDown = false;
 				
         		}else if(liftUp){ //go up to dogs
-				//System.out.println("up");
         			if(liftEncoder.getDistance() > upperSetPoint){
         				liftUp = false;
         				liftDown = true;
         			}
 				
-				lift.set(0.75);
+        			lift.set(0.75);
 				
-        		}else if(liftDown){//go down to start
-				System.out.println("down");
-
-				if(liftEncoder.getDistance() < lowerSetPoint){
-					liftUp = false;
-					liftDown = false;
-				}
+        		}else if(liftDown){//go down to bottom
+        			if(liftEncoder.getDistance() < lowerSetPoint){
+        				liftUp = false;
+        				liftDown = false;
+        			}
 				
-				lift.set(-0.75);
+        			lift.set(-0.75);
 	   
-			}else{
-				lift.set(0);
-			}	
+        		}else{
+        			lift.set(0);
+        		}	
         	}
-        	
-   
         }
         
         if(auxStick.getRawButton(7) && liftLowerLimit.get()){ //reset lift encoder
         	liftEncoder.reset();
+        	System.out.println("encoder reset");
         }
 //===================================================================================================
         //picker //unloading
@@ -488,7 +484,7 @@ public class Robot extends IterativeRobot {
         	}
         }
 //============================================================================================        
-        //Timer.delay(0.005);
+        Timer.delay(0.005);
         //System.out.println(unloadCounter);
 		//System.out.println(toteInRobot.get());
         //System.out.println(liftUpperLimit.get());
