@@ -27,7 +27,7 @@ public class Robot extends IterativeRobot {
 	DigitalInput toteInRobot;
 	Encoder backRightEncoder;
 	Encoder backLeftEncoder;
-	
+	double lower;
 	Compressor compressor;
 	Solenoid dogs;
 	Solenoid pusher;
@@ -319,6 +319,7 @@ public class Robot extends IterativeRobot {
     	liftUp = false;
     	liftDown = false;
     	unloadCounter = 0;
+    	lower = 40;
     }
 
     /**
@@ -375,11 +376,12 @@ public class Robot extends IterativeRobot {
         
         //human overide
         if(auxCard.getRawButton(12) || auxStick.getRawButton(3) || auxStick.getRawButton(2)){
-        	System.out.println("on");
-        	if(auxStick.getRawButton(3) && !liftUpperLimit.get() && liftEncoder.getDistance() < 1100){  //up
+        	
+        	if(auxStick.getRawButton(3) && !liftUpperLimit.get() && liftEncoder.getDistance() < 1270){  //up
             	lift.set(1);
-            }else if(auxStick.getRawButton(2) && !liftLowerLimit.get() /*&& liftEncoder.getDistance() > 20*/){  //down
+            }else if(auxStick.getRawButton(2) && !liftLowerLimit.get()){  //down
             	lift.set(-0.9);
+            
             }else if(auxCard.getRawButton(11)){
             	if(liftEncoder.getDistance() > 200){ 
     				lift.set(-0.5);
@@ -468,7 +470,7 @@ public class Robot extends IterativeRobot {
         		leftPicker.set(0);
         		rightPicker.set(0);		
         	}
-        	if(liftEncoder.getDistance() > 1200){
+        	if(liftEncoder.getDistance() > 1300){
         		dogs.set(true);
         	}else if(auxStick.getRawButton(6)){
         		dogs.set(true);
