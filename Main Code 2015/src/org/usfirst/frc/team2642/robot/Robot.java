@@ -91,7 +91,7 @@ public class Robot extends IterativeRobot {
      */
     public void autonomousPeriodic() {
     	//put in gyro crab straight
-    	
+    	/*
     	while(backLeftEncoder.getDistance() > 50){ //drive to first box
     		drive.mecanumDrive_Cartesian(0, -0.3, 0, 0);
     		rightPicker.set(0);
@@ -305,7 +305,7 @@ public class Robot extends IterativeRobot {
     		dogs.set(false);
     		pusher.set(false);
     	}
-    	
+    	*/
     }
     
     /**
@@ -331,24 +331,27 @@ public class Robot extends IterativeRobot {
        	gyro.reset();
     	}
     	
+    	
+
+    	
         if (driveStick.getRawButton(2) && crabStraightCounter < 1){ //turn on crab straight
         	crabStraightSet = gyro.getAngle();
         	crabStraightCounter++;
         
         }else if (driveStick.getRawButton(2) && crabStraightCounter >= 1){ //crab straight
-        	drive.mecanumDrive_Cartesian(driveStick.getX(), driveStick.getY(), (angle - crabStraightSet)*-Kp, 0);
+        	drive.mecanumDrive_Cartesian(driveStick.getX(), (angle - crabStraightSet)*-Kp, driveStick.getTwist(), 0);
         	crabStraightCounter++;
 
         }else if( !driveStick.getRawButton(2) && crabStraightCounter >= 1){ //reset counter
         	crabStraightCounter = 0;
         }else if(driveStick.getRawButton(1)){ //full speed
-        	drive.mecanumDrive_Cartesian(driveStick.getX(), driveStick.getY(), driveStick.getTwist(), gyro.getAngle());
+        	drive.mecanumDrive_Cartesian(driveStick.getX(), driveStick.getTwist(), driveStick.getY(), gyro.getAngle());
 
-        }else if(auxCard.getRawButton(6)){ //turn of field oriented control 
-        	drive.mecanumDrive_Cartesian(driveStick.getX(), driveStick.getY(), driveStick.getTwist(), 0);
+        }else if(auxCard.getRawButton(6)){ //turn off field oriented control 
+        	drive.mecanumDrive_Cartesian(driveStick.getX(), driveStick.getTwist(), driveStick.getY(), 0);
 
         }else{
-        	drive.mecanumDrive_Cartesian(driveStick.getX()/2, driveStick.getY()/2, driveStick.getTwist()/2, gyro.getAngle());
+        	drive.mecanumDrive_Cartesian(driveStick.getX()/2, driveStick.getTwist()/2, driveStick.getY()/2, gyro.getAngle());
         }
         
         if(driveStick.getRawButton(3)){ //flipper 
@@ -358,8 +361,8 @@ public class Robot extends IterativeRobot {
         }
  //==============================================================================================
         //lift
-        
         /*
+        //testy test mode
         if(auxStick.getRawButton(3) && !liftUpperLimit.get()){  //up
         	lift.set(1);
         }else if(auxStick.getRawButton(2) && !liftLowerLimit.get()){  //down
@@ -371,11 +374,11 @@ public class Robot extends IterativeRobot {
        //human overide
         
         //human overide
-        if(auxCard.getRawButton(12) || auxStick.getRawButton(3) || auxStick.getRawButton(4)){
+        if(auxCard.getRawButton(12) || auxStick.getRawButton(3) || auxStick.getRawButton(2)){
         	System.out.println("on");
-        	if(auxStick.getRawButton(3) && !liftUpperLimit.get()){  //up
+        	if(auxStick.getRawButton(3) && !liftUpperLimit.get() && liftEncoder.getDistance() < 1100){  //up
             	lift.set(1);
-            }else if(auxStick.getRawButton(2) && !liftLowerLimit.get()){  //down
+            }else if(auxStick.getRawButton(2) && !liftLowerLimit.get() /*&& liftEncoder.getDistance() > 20*/){  //down
             	lift.set(-0.9);
             }else if(auxCard.getRawButton(11)){
             	if(liftEncoder.getDistance() > 200){ 
@@ -399,22 +402,22 @@ public class Robot extends IterativeRobot {
 				
 			}else if(liftUp){ //go up to dogs
 				//System.out.println("up");
-				if(liftEncoder.getDistance() > 1250){
+				if(liftEncoder.getDistance() > 1110){
 					liftUp = false;
 					liftDown = true;
 				}
 				
-				lift.set(0.5);
+				lift.set(0.75);
 				
 			}else if(liftDown){//go down to start
 				System.out.println("down");
 
-				if(liftEncoder.getDistance() < 80){
+				if(liftEncoder.getDistance() < 20){
 					liftUp = false;
 					liftDown = false;
 				}
 				
-				lift.set(-0.5);
+				lift.set(-0.75);
 	   
 			}else{
 				lift.set(0);
@@ -426,15 +429,15 @@ public class Robot extends IterativeRobot {
         
         
 //===================================================================================================
-        //picker
-        if(auxStick.getRawButton(1)){ //suto unload
+        //picker //unloading
+        if(auxStick.getRawButton(1)){ //auto unload
         	if(auxStick.getRawButton(1) && unloadCounter <= 25){ //open dogs
         		dogs.set(true);
         		pusher.set(false);
         		rightPicker.set(0);
         		leftPicker.set(0);
         		unloadCounter++;
-        	}else if(auxStick.getRawButton(1) && unloadCounter >= 25){ //open dogs push and revers pickers
+        	}else if(auxStick.getRawButton(1) && unloadCounter >= 25){ //open dogs push and reverses pickers
         		dogs.set(true);
         		pusher.set(true);
         		rightPicker.set(-0.5);
@@ -465,8 +468,9 @@ public class Robot extends IterativeRobot {
         		leftPicker.set(0);
         		rightPicker.set(0);		
         	}
-
-        	if(auxStick.getRawButton(6)){
+        	if(liftEncoder.getDistance() > 1200){
+        		dogs.set(true);
+        	}else if(auxStick.getRawButton(6)){
         		dogs.set(true);
         	}else{
         		dogs.set(false);
@@ -483,6 +487,11 @@ public class Robot extends IterativeRobot {
         //System.out.println(unloadCounter);
 		//System.out.println(toteInRobot.get());
         //System.out.println(liftUpperLimit.get());
+        //System.out.println(liftEncoder.getDistance());
+        //System.out.println(liftUpperLimit.get() + " upper");
+        //System.out.println(liftLowerLimit.get() + " lower");
+        System.out.println(liftEncoder.getDistance());
+        System.out.println(toteInRobot.get());
 
     }
 
