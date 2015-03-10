@@ -27,7 +27,9 @@ public class Robot extends IterativeRobot {
 	DigitalInput toteInRobot;
 	Encoder backRightEncoder;
 	Encoder backLeftEncoder;
-	double lower;
+	int lowerSetPoint = 40;
+	int upperSetPoint = 1290;
+	
 	Compressor compressor;
 	Solenoid dogs;
 	Solenoid pusher;
@@ -319,7 +321,7 @@ public class Robot extends IterativeRobot {
     	liftUp = false;
     	liftDown = false;
     	unloadCounter = 0;
-    	lower = 40;
+    	
     }
 
     /**
@@ -331,9 +333,6 @@ public class Robot extends IterativeRobot {
     	if(auxCard.getRawButton(5)){ //reset gyro
        	gyro.reset();
     	}
-    	
-    	
-
     	
         if (driveStick.getRawButton(2) && crabStraightCounter < 1){ //turn on crab straight
         	crabStraightSet = gyro.getAngle();
@@ -377,12 +376,12 @@ public class Robot extends IterativeRobot {
         //human overide
         if(auxCard.getRawButton(12) || auxStick.getRawButton(3) || auxStick.getRawButton(2)){
         	
-        	if(auxStick.getRawButton(3) && !liftUpperLimit.get() && liftEncoder.getDistance() < 1290){  //up
+        	if(auxStick.getRawButton(3) && !liftUpperLimit.get() && liftEncoder.getDistance() < upperSetPoint){  //up
             	lift.set(1);
-            }else if(auxStick.getRawButton(2) && !liftLowerLimit.get()){  //down
+            }else if(auxStick.getRawButton(2) && !liftLowerLimit.get() && liftEncoder.getDistance() > lowerSetPoint){  //down
             	lift.set(-0.9);
             
-            }else if(auxCard.getRawButton(11)){
+            }else if(auxCard.getRawButton(11)){ //set point //debug me!!!!!!!!!!!!!!!!!!!
             	if(liftEncoder.getDistance() > 200){ 
     				lift.set(-0.5);
     			}else if(liftEncoder.getDistance() < 140){
@@ -390,11 +389,13 @@ public class Robot extends IterativeRobot {
     			}else{
     				lift.set(0);
     			}
+            }else if(auxStick.getRawButton(7) && !liftLowerLimit.get()){ //zero lift encoder
+            	lift.set(-0.5); //see if statement below for encoder reset
             }else{
             	lift.set(0);                            
             }
         }else{ //auto lift
-        	if(liftUpperLimit.get() || liftLowerLimit.get()){
+        	if(liftUpperLimit.get() || (liftLowerLimit.get() && !toteInRobot.get())){//stop at upper limits
         		liftUp = false;
         		liftDown = false;
         	}else{
@@ -402,19 +403,19 @@ public class Robot extends IterativeRobot {
         			liftUp = true; 
         			liftDown = false;
 				
-			}else if(liftUp){ //go up to dogs
+        		}else if(liftUp){ //go up to dogs
 				//System.out.println("up");
-				if(liftEncoder.getDistance() > 1200){
-					liftUp = false;
-					liftDown = true;
-				}
+        			if(liftEncoder.getDistance() > upperSetPoint){
+        				liftUp = false;
+        				liftDown = true;
+        			}
 				
 				lift.set(0.75);
 				
-			}else if(liftDown){//go down to start
+        		}else if(liftDown){//go down to start
 				System.out.println("down");
 
-				if(liftEncoder.getDistance() < 20){
+				if(liftEncoder.getDistance() < lowerSetPoint){
 					liftUp = false;
 					liftDown = false;
 				}
@@ -429,7 +430,9 @@ public class Robot extends IterativeRobot {
    
         }
         
-        
+        if(auxStick.getRawButton(7) && liftLowerLimit.get()){ //reset lift encoder
+        	liftEncoder.reset();
+        }
 //===================================================================================================
         //picker //unloading
         if(auxStick.getRawButton(1)){ //auto unload
@@ -470,7 +473,7 @@ public class Robot extends IterativeRobot {
         		leftPicker.set(0);
         		rightPicker.set(0);		
         	}
-        	if(liftEncoder.getDistance() > 1300){
+        	if(liftEncoder.getDistance() > (upperSetPoint + 10)){
         		dogs.set(true);
         	}else if(auxStick.getRawButton(6)){
         		dogs.set(true);
