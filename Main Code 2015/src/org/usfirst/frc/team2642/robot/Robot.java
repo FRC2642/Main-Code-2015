@@ -339,19 +339,19 @@ public class Robot extends IterativeRobot {
         	crabStraightCounter++;
         
         }else if (driveStick.getRawButton(2) && crabStraightCounter >= 1){ //crab straight
-        	drive.mecanumDrive_Cartesian(driveStick.getX(), (angle - crabStraightSet)*-Kp, driveStick.getTwist(), 0);
+        	drive.mecanumDrive_Cartesian(-driveStick.getX(), (angle - crabStraightSet)*-Kp, driveStick.getTwist(), 0);
         	crabStraightCounter++;
 
         }else if( !driveStick.getRawButton(2) && crabStraightCounter >= 1){ //reset counter
         	crabStraightCounter = 0;
         }else if(driveStick.getRawButton(1)){ //full speed
-        	drive.mecanumDrive_Cartesian(driveStick.getX(), driveStick.getTwist(), driveStick.getY(), gyro.getAngle());
+        	drive.mecanumDrive_Cartesian(-driveStick.getX(), driveStick.getTwist(), driveStick.getY(), gyro.getAngle());
 
         }else if(auxCard.getRawButton(6)){ //turn off field oriented control 
-        	drive.mecanumDrive_Cartesian(driveStick.getX(), driveStick.getTwist(), driveStick.getY(), 0);
+        	drive.mecanumDrive_Cartesian(-driveStick.getX(), driveStick.getTwist(), driveStick.getY(), 0);
 
         }else{
-        	drive.mecanumDrive_Cartesian(driveStick.getX()/2, driveStick.getTwist()/2, driveStick.getY()/2, gyro.getAngle());
+        	drive.mecanumDrive_Cartesian(-driveStick.getX()/2, driveStick.getTwist()/2, driveStick.getY()/2, gyro.getAngle());
         }
         
         if(driveStick.getRawButton(3)){ //flipper 
@@ -389,7 +389,7 @@ public class Robot extends IterativeRobot {
     			}else{
     				lift.set(0);
     			}
-            }else if(auxStick.getRawButton(7) && !liftLowerLimit.get()){ //zero lift encoder
+            }else if(auxStick.getRawButton(10) && !liftLowerLimit.get()){ //zero lift encoder
             	lift.set(-0.5); //see if statement below for encoder reset
             }else{
             	lift.set(0);                            
