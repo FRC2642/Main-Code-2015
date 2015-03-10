@@ -377,7 +377,7 @@ public class Robot extends IterativeRobot {
         //human overide
         if(auxCard.getRawButton(12) || auxStick.getRawButton(3) || auxStick.getRawButton(2)){
         	
-        	if(auxStick.getRawButton(3) && !liftUpperLimit.get() && liftEncoder.getDistance() < 1270){  //up
+        	if(auxStick.getRawButton(3) && !liftUpperLimit.get() && liftEncoder.getDistance() < 1290){  //up
             	lift.set(1);
             }else if(auxStick.getRawButton(2) && !liftLowerLimit.get()){  //down
             	lift.set(-0.9);
@@ -404,7 +404,7 @@ public class Robot extends IterativeRobot {
 				
 			}else if(liftUp){ //go up to dogs
 				//System.out.println("up");
-				if(liftEncoder.getDistance() > 1110){
+				if(liftEncoder.getDistance() > 1200){
 					liftUp = false;
 					liftDown = true;
 				}
