@@ -339,7 +339,7 @@ public class Robot extends IterativeRobot {
         	crabStraightCounter++;
         
         }else if (driveStick.getRawButton(2) && crabStraightCounter >= 1){ //crab straight
-        	drive.mecanumDrive_Cartesian(driveStick.getX(), (angle - crabStraightSet)*-Kp, driveStick.getTwist(), 0);
+        	drive.mecanumDrive_Cartesian(driveStick.getX(), (angle - crabStraightSet)*-Kp, driveStick.getY(), 0);
         	crabStraightCounter++;
 
         }else if( !driveStick.getRawButton(2) && crabStraightCounter >= 1){ //reset counter
