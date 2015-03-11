@@ -18,15 +18,11 @@ public class Robot extends IterativeRobot {
 	Joystick driveStick; Joystick auxStick; Joystick auxCard; 
 	RobotDrive drive;
 	Gyro gyro;
-	DigitalInput liftUpperLimit;
-	DigitalInput liftLowerLimit;
-	Talon rightPicker;
-	Talon leftPicker;
-	Talon lift;
+	DigitalInput liftUpperLimit; DigitalInput liftLowerLimit;
+	Talon rightPicker; Talon leftPicker; Talon lift;
 	Encoder liftEncoder;
 	DigitalInput toteInRobot;
-	Encoder backRightEncoder;
-	Encoder backLeftEncoder;
+	Encoder backRightEncoder; Encoder backLeftEncoder;
 	final int lowerSetPoint = 80;
 	final int upperSetPoint = 1130;
 	
@@ -341,7 +337,7 @@ public class Robot extends IterativeRobot {
         }else if (driveStick.getRawButton(2) && crabStraightCounter >= 1){ //crab straight
         	drive.mecanumDrive_Cartesian(driveStick.getX(), (angle - crabStraightSet)*-Kp, driveStick.getY(), 0);
         	crabStraightCounter++;
-
+  
         }else if( !driveStick.getRawButton(2) && crabStraightCounter >= 1){ //reset counter
         	crabStraightCounter = 0;
         }else if(driveStick.getRawButton(1)){ //full speed
